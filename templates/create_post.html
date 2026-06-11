@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Create Post – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+<div class="col-12 col-md-8 col-lg-6">
+<div class="create-post-card">
+    <div class="px-4 py-3 border-bottom" style="border-color:var(--border)!important;">
+        <h2 class="mb-0 text-center fw-semibold" style="font-size:1rem;">Create New Post</h2>
+    </div>
+
+    <div class="p-4">
+        <form method="POST" action="{{ url_for('create_post') }}" enctype="multipart/form-data" id="postForm">
+
+            <!-- Drop Zone -->
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('imageInput').click()">
+                <i class="fas fa-cloud-upload-alt d-block mb-2"></i>
+                <p class="mb-1 fw-semibold" style="font-size:0.9rem;">Click or Drag & Drop to upload</p>
+                <p class="text-muted-gm" style="font-size:0.78rem;">PNG, JPG, GIF, WEBP – Max 16MB</p>
+                <input type="file" id="imageInput" name="image"
+                       accept=".png,.jpg,.jpeg,.gif,.webp" required style="display:none;">
+            </div>
+
+            <!-- Preview -->
+            <div id="previewBox" style="display:none;margin-bottom:16px;">
+                <img id="previewImg" src="" alt="Preview"
+                     style="width:100%;max-height:500px;object-fit:contain;border-radius:10px;
+                            border:1px solid var(--border);">
+                <button type="button" onclick="clearPreview()"
+                        style="background:var(--danger);color:#fff;border:none;border-radius:6px;
+                               padding:4px 12px;font-size:0.8rem;margin-top:8px;cursor:pointer;">
+                    Remove
+                </button>
+            </div>
+
+            <!-- Caption -->
+            <div class="mb-3">
+                <textarea name="caption" rows="3"
+                          placeholder="Write a caption..."
+                          style="width:100%;border:1px solid var(--border);border-radius:10px;
+                                 padding:12px 14px;background:var(--bg);color:var(--text);
+                                 font-size:0.9rem;resize:none;outline:none;line-height:1.5;"
+                          maxlength="2000"></textarea>
+            </div>
+
+            <button type="submit" class="btn-grad w-100 justify-content-center" style="width:100%;padding:11px;">
+                <i class="fas fa-share-square me-2"></i>Share Post
+            </button>
+        </form>
+    </div>
+</div>
+</div>
+</div>
+
+{% block scripts %}
+<script>
+const dropZone  = document.getElementById('dropZone');
+const imgInput  = document.getElementById('imageInput');
+const prevBox   = document.getElementById('previewBox');
+const prevImg   = document.getElementById('previewImg');
+
+imgInput.addEventListener('change', handleFile);
+
+['dragover','dragenter'].forEach(e => dropZone.addEventListener(e, ev => {
+    ev.preventDefault(); dropZone.classList.add('active');
+}));
+['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => {
+    ev.preventDefault(); dropZone.classList.remove('active');
+}));
+dropZone.addEventListener('drop', ev => {
+    imgInput.files = ev.dataTransfer.files;
+    handleFile();
+});
+
+function handleFile() {
+    const file = imgInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        prevImg.src = e.target.result;
+        prevBox.style.display = 'block';
+        dropZone.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearPreview() {
+    imgInput.value = '';
+    prevBox.style.display = 'none';
+    dropZone.style.display = 'block';
+}
+</script>
+{% endblock %}
+{% endblock %}

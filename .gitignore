@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+env/
+.venv/
+.env.local
+
+# Environment variables (keep .env out of git for security)
+.env
+
+# Flask / SQLAlchemy
+instance/
+*.db
+*.sqlite3
+
+# Uploads (user-generated content)
+static/uploads/
+
+# Report / Docs
+*.docx
+
+# IDE / OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# Logs
+*.log

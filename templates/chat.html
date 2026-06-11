@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Chat with {{ target.username }} – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center" style="height:calc(100vh - 80px);">
+<div class="col-12 col-md-8 col-lg-7" style="height:100%;display:flex;flex-direction:column;">
+
+<div class="chat-wrapper" style="flex:1;">
+
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <a href="{{ url_for('profile', username=target.username) }}" class="d-flex align-items-center gap-2"
+           style="text-decoration:none;color:var(--text);">
+            {% if target.profile_pic == 'default.jpg' %}
+            <img src="https://ui-avatars.com/api/?name={{ target.username }}&size=44&rounded=true"
+                 class="avatar-md" alt="{{ target.username }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/avatars/' + target.profile_pic) }}"
+                 class="avatar-md" alt="{{ target.username }}">
+            {% endif %}
+            <div>
+                <div class="fw-semibold" style="font-size:0.95rem;">{{ target.username }}</div>
+                <div class="text-muted-gm" style="font-size:0.78rem;">View profile</div>
+            </div>
+        </a>
+        <div class="ms-auto">
+            <i class="fas fa-phone-alt nav-icon-link" style="cursor:pointer;" title="Call (coming soon)"></i>
+            <i class="fas fa-video nav-icon-link ms-2" style="cursor:pointer;" title="Video (coming soon)"></i>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chatBox">
+        {% if not messages %}
+        <div class="empty-state">
+            <i class="far fa-comments"></i>
+            <h4>Start a conversation</h4>
+            <p>Say hello to {{ target.username }}!</p>
+        </div>
+        {% endif %}
+
+        {% for msg in messages %}
+        {% set is_mine = (msg.sender_id == current_user.id) %}
+        <div class="msg-group">
+            <div class="msg-bubble {{ 'msg-sent' if is_mine else 'msg-received' }}">
+                {{ msg.message }}
+            </div>
+            <div class="msg-time {{ 'msg-time-sent' if is_mine else 'msg-time-recv' }}">
+                {{ msg.timestamp.strftime('%I:%M %p') }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+        <form class="chat-input-form" action="{{ url_for('chat', username=target.username) }}" method="POST">
+            <i class="far fa-smile" style="color:var(--text-muted);cursor:pointer;font-size:1.1rem;"></i>
+            <input type="text" name="message" class="chat-input-field"
+                   placeholder="Message {{ target.username }}..."
+                   required autofocus autocomplete="off">
+            <button type="submit" class="chat-send-btn">Send</button>
+        </form>
+    </div>
+
+</div>
+</div>
+</div>
+
+{% block scripts %}
+<script>
+// Auto-scroll to bottom
+const cb = document.getElementById('chatBox');
+cb.scrollTop = cb.scrollHeight;
+</script>
+{% endblock %}
+{% endblock %}

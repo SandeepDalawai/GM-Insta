@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Explore – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+<div class="col-12 col-md-10 col-lg-9">
+
+    <h2 class="fw-semibold mb-4" style="font-size:1rem;">
+        <i class="fas fa-compass me-2" style="background:var(--primary);-webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;"></i>Explore
+    </h2>
+
+    {% if not posts %}
+    <div class="empty-state">
+        <i class="fas fa-images"></i>
+        <h4>Nothing Here Yet</h4>
+        <p>Be the first to share a post!</p>
+        <a href="{{ url_for('create_post') }}" class="btn-grad mt-2">Create Post</a>
+    </div>
+    {% else %}
+    <div class="explore-grid">
+        {% for post in posts %}
+        <div class="grid-item">
+            <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+                 alt="Explore post" loading="lazy">
+            <div class="grid-overlay">
+                <span><i class="fas fa-heart me-1"></i>{{ post.like_count() }}</span>
+                <span><i class="fas fa-comment me-1"></i>{{ post.comments|length }}</span>
+            </div>
+            <a href="{{ url_for('profile', username=post.author.username) }}"
+               style="position:absolute;inset:0;z-index:1;opacity:0;"></a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}

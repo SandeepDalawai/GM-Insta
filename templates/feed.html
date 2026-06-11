@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Home – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-2">
+    <div class="col-12 col-sm-10 col-md-7 col-lg-6">
+
+        {% if not posts %}
+        <div class="empty-state">
+            <i class="fas fa-camera-retro"></i>
+            <h4>No Posts Yet</h4>
+            <p>Follow people to see their photos here!</p>
+            <a href="{{ url_for('search') }}" class="btn-grad mt-2">
+                <i class="fas fa-search"></i> Find People
+            </a>
+        </div>
+        {% endif %}
+
+        {% for post in posts %}
+        <article class="card" id="post-{{ post.id }}">
+
+            <!-- Post Header -->
+            <div class="post-header">
+                <div class="post-header-left">
+                    <a href="{{ url_for('profile', username=post.author.username) }}">
+                        {% if post.author.profile_pic == 'default.jpg' %}
+                        <img src="https://ui-avatars.com/api/?name={{ post.author.username }}&size=32&background=random&rounded=true"
+                             class="avatar-sm" alt="{{ post.author.username }}">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.profile_pic) }}"
+                             class="avatar-sm" alt="{{ post.author.username }}">
+                        {% endif %}
+                    </a>
+                    <div>
+                        <a href="{{ url_for('profile', username=post.author.username) }}"
+                           class="post-username d-block">{{ post.author.username }}</a>
+                    </div>
+                </div>
+                <i class="fas fa-ellipsis-h" style="color:var(--text-muted);cursor:pointer;"></i>
+            </div>
+
+            <!-- Post Image -->
+            <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+                 class="post-image" alt="Post by {{ post.author.username }}" loading="lazy">
+
+            <!-- Actions -->
+            <div class="post-actions">
+                <!-- Like -->
+                <form class="like-btn-form" action="{{ url_for('like_post', post_id=post.id) }}" method="POST">
+                    <button type="submit"
+                            class="like-btn {{ 'liked' if post.is_liked_by(current_user.id) else '' }}"
+                            title="{{ 'Unlike' if post.is_liked_by(current_user.id) else 'Like' }}">
+                        <i class="{{ 'fas' if post.is_liked_by(current_user.id) else 'far' }} fa-heart"></i>
+                    </button>
+                </form>
+                <!-- Comment icon -->
+                <button onclick="document.getElementById('cmt-{{ post.id }}').focus()"
+                        class="like-btn" title="Comment">
+                    <i class="far fa-comment"></i>
+                </button>
+                <!-- Message author shortcut -->
+                {% if post.author.id != current_user.id %}
+                <a href="{{ url_for('chat', username=post.author.username) }}"
+                   class="like-btn" title="Message">
+                    <i class="far fa-paper-plane"></i>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Likes count -->
+            <div class="post-content">
+                <div class="post-likes">
+                    {{ post.like_count() }} {{ 'like' if post.like_count() == 1 else 'likes' }}
+                </div>
+
+                <!-- Caption -->
+                {% if post.caption %}
+                <div class="post-caption">
+                    <a href="{{ url_for('profile', username=post.author.username) }}"
+                       class="fw-semibold" style="color:var(--text);">{{ post.author.username }}</a>
+                    {{ post.caption }}
+                </div>
+                {% endif %}
+
+                <!-- Comments (show max 3) -->
+                {% if post.comments %}
+                <div class="comment-list">
+                    {% for comment in post.comments[-3:] %}
+                    <div class="comment-item">
+                        <a href="{{ url_for('profile', username=comment.author.username) }}"
+                           class="fw-semibold" style="color:var(--text);">
+                            {{ comment.author.username }}
+                        </a>
+                        <span>{{ comment.text }}</span>
+                    </div>
+                    {% endfor %}
+                    {% if post.comments|length > 3 %}
+                    <div class="text-muted-gm" style="font-size:0.82rem;">
+                        View all {{ post.comments|length }} comments
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="post-time mt-2">{{ post.created_at.strftime('%B %d, %Y') }}</div>
+            </div>
+
+            <!-- Comment box -->
+            <div class="comment-box">
+                <i class="far fa-smile" style="color:var(--text-muted);font-size:1.1rem;cursor:pointer;"></i>
+                <form action="{{ url_for('comment_post', post_id=post.id) }}" method="POST"
+                      style="flex:1;display:flex;align-items:center;gap:8px;">
+                    <input type="text" id="cmt-{{ post.id }}" name="text"
+                           class="comment-box-input" style="flex:1;border:none;background:transparent;
+                           color:var(--text);outline:none;font-size:0.88rem;"
+                           placeholder="Add a comment..." autocomplete="off">
+                    <button type="submit" class="comment-post-btn">Post</button>
+                </form>
+            </div>
+        </article>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

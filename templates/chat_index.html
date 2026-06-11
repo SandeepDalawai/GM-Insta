@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Messages – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+<div class="col-12 col-md-7 col-lg-6">
+
+    <div class="card" style="overflow:hidden;">
+        <div class="px-4 py-3 border-bottom d-flex align-items-center justify-content-between"
+             style="border-color:var(--border)!important;">
+            <h2 class="mb-0 fw-semibold" style="font-size:1rem;">{{ current_user.username }}</h2>
+            <a href="{{ url_for('search') }}" class="btn-grad" style="font-size:0.8rem;padding:5px 12px;">
+                <i class="fas fa-edit me-1"></i>New Message
+            </a>
+        </div>
+
+        {% if not partners %}
+        <div class="empty-state">
+            <i class="far fa-paper-plane"></i>
+            <h4>No Messages Yet</h4>
+            <p>Send a message to start a conversation!</p>
+            <a href="{{ url_for('search') }}" class="btn-grad mt-2">Find People</a>
+        </div>
+        {% endif %}
+
+        {% for partner in partners %}
+        <a class="convo-item" href="{{ url_for('chat', username=partner.username) }}">
+            {% if partner.profile_pic == 'default.jpg' %}
+            <img src="https://ui-avatars.com/api/?name={{ partner.username }}&size=56&rounded=true"
+                 class="avatar-md flex-shrink-0" alt="{{ partner.username }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/avatars/' + partner.profile_pic) }}"
+                 class="avatar-md flex-shrink-0" alt="{{ partner.username }}">
+            {% endif %}
+            <div class="flex-grow-1 overflow-hidden">
+                <div class="fw-semibold" style="font-size:0.9rem;">{{ partner.username }}</div>
+                <div class="text-muted-gm text-truncate" style="font-size:0.8rem;">Tap to open conversation</div>
+            </div>
+            <i class="fas fa-chevron-right text-muted-gm"></i>
+        </a>
+        {% endfor %}
+    </div>
+
+</div>
+</div>
+{% endblock %}

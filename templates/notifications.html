@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Notifications – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+<div class="col-12 col-md-7 col-lg-6">
+
+    <div class="card" style="overflow:hidden;">
+        <div class="px-4 py-3 border-bottom" style="border-color:var(--border)!important;">
+            <h2 class="mb-0 fw-semibold" style="font-size:1rem;">Notifications</h2>
+        </div>
+
+        {% if not notifications %}
+        <div class="empty-state">
+            <i class="far fa-heart"></i>
+            <h4>No Notifications Yet</h4>
+            <p>When someone likes or comments on your posts, you'll see it here.</p>
+        </div>
+        {% endif %}
+
+        {% for n in notifications %}
+        <div class="notif-item {{ 'unread' if not n.is_read else '' }}">
+
+            <!-- Actor avatar -->
+            <a href="{{ url_for('profile', username=n.actor.username) }}" class="flex-shrink-0">
+                {% if n.actor.profile_pic == 'default.jpg' %}
+                <img src="https://ui-avatars.com/api/?name={{ n.actor.username }}&size=44&rounded=true"
+                     class="avatar-md" alt="{{ n.actor.username }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='uploads/avatars/' + n.actor.profile_pic) }}"
+                     class="avatar-md" alt="{{ n.actor.username }}">
+                {% endif %}
+            </a>
+
+            <!-- Text -->
+            <div class="notif-text">
+                <a href="{{ url_for('profile', username=n.actor.username) }}"
+                   class="fw-semibold" style="color:var(--text);">{{ n.actor.username }}</a>
+                {% if n.notif_type == 'like' %}
+                    liked your <a href="{{ url_for('feed') }}" style="color:var(--text);">photo</a>.
+                {% elif n.notif_type == 'comment' %}
+                    commented on your <a href="{{ url_for('feed') }}" style="color:var(--text);">photo</a>.
+                {% elif n.notif_type == 'follow' %}
+                    started following you.
+                {% elif n.notif_type == 'message' %}
+                    sent you a <a href="{{ url_for('chat', username=n.actor.username) }}" style="color:var(--text);">message</a>.
+                {% endif %}
+                <span class="notif-time d-block">{{ n.created_at.strftime('%b %d · %I:%M %p') }}</span>
+            </div>
+
+            <!-- Post thumbnail (if applicable) -->
+            {% if n.post %}
+            <a href="{{ url_for('feed') }}" class="flex-shrink-0">
+                <img src="{{ url_for('static', filename='uploads/posts/' + n.post.image) }}"
+                     class="notif-thumb" alt="post">
+            </a>
+            {% elif n.notif_type == 'like' or n.notif_type == 'comment' %}
+            <i class="fas fa-heart text-danger"></i>
+            {% elif n.notif_type == 'follow' %}
+            <form action="{{ url_for('follow', username=n.actor.username) }}" method="POST">
+                <button type="submit"
+                        class="{{ 'btn-outline-gm' if current_user.is_following(n.actor) else 'btn-grad' }}"
+                        style="font-size:0.8rem;padding:5px 12px;">
+                    {{ 'Following' if current_user.is_following(n.actor) else 'Follow Back' }}
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+</div>
+{% endblock %}

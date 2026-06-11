@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Search – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+<div class="col-12 col-md-7 col-lg-6">
+
+    <!-- Search Bar -->
+    <form method="GET" action="{{ url_for('search') }}">
+        <div class="search-bar">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" name="q" value="{{ query }}"
+                   placeholder="Search by username..." autofocus autocomplete="off"
+                   id="searchInput">
+        </div>
+    </form>
+
+    <!-- Results -->
+    {% if query and not users %}
+    <div class="empty-state" style="padding:40px 20px;">
+        <i class="fas fa-user-slash"></i>
+        <h4>No results for "{{ query }}"</h4>
+        <p>Try a different username.</p>
+    </div>
+    {% endif %}
+
+    {% for user in users %}
+    <div class="user-card">
+        <!-- Avatar -->
+        <a href="{{ url_for('profile', username=user.username) }}" class="flex-shrink-0">
+            {% if user.profile_pic == 'default.jpg' %}
+            <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=56&rounded=true"
+                 class="avatar-md" alt="{{ user.username }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/avatars/' + user.profile_pic) }}"
+                 class="avatar-md" alt="{{ user.username }}">
+            {% endif %}
+        </a>
+
+        <!-- Info -->
+        <div class="flex-grow-1">
+            <a href="{{ url_for('profile', username=user.username) }}"
+               class="fw-semibold d-block" style="color:var(--text);font-size:0.9rem;">
+                {{ user.username }}
+            </a>
+            <span class="text-muted-gm" style="font-size:0.8rem;">
+                {{ user.followers_count() }} followers
+                {% if user.bio %} · {{ user.bio[:40] }}{% if user.bio|length > 40 %}…{% endif %}{% endif %}
+            </span>
+        </div>
+
+        <!-- Follow btn -->
+        <form action="{{ url_for('follow', username=user.username) }}" method="POST">
+            <button type="submit"
+                    class="{{ 'btn-outline-gm' if current_user.is_following(user) else 'btn-grad' }}"
+                    style="font-size:0.82rem;padding:6px 14px;">
+                {{ 'Following' if current_user.is_following(user) else 'Follow' }}
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+
+    {% if not query %}
+    <div class="empty-state" style="padding:40px 20px;">
+        <i class="fas fa-users"></i>
+        <h4>Discover People</h4>
+        <p>Search for friends and interesting people to follow.</p>
+    </div>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}

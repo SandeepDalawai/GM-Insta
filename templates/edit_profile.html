@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+<div class="col-12 col-md-7 col-lg-6">
+<div class="edit-profile-card">
+
+    <h2 class="fw-semibold mb-4" style="font-size:1.1rem;">Edit Profile</h2>
+
+    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+
+        <!-- Avatar Preview -->
+        <div class="text-center mb-4">
+            {% if user.profile_pic == 'default.jpg' %}
+            <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=100&rounded=true"
+                 class="avatar-lg mb-3" id="avatarPreview" alt="Avatar">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/avatars/' + user.profile_pic) }}"
+                 class="avatar-lg mb-3" id="avatarPreview" alt="Avatar">
+            {% endif %}
+            <br>
+            <label for="picInput" class="btn-outline-gm" style="cursor:pointer;font-size:0.82rem;">
+                <i class="fas fa-camera me-1"></i>Change Photo
+            </label>
+            <input type="file" id="picInput" name="profile_pic"
+                   accept=".png,.jpg,.jpeg,.gif,.webp" style="display:none;">
+        </div>
+
+        <hr class="divider">
+
+        <!-- Username (read-only) -->
+        <div class="mb-3">
+            <label class="text-muted-gm fw-semibold" style="font-size:0.82rem;display:block;margin-bottom:4px;">
+                USERNAME
+            </label>
+            <input type="text" value="{{ user.username }}" disabled
+                   style="width:100%;padding:10px 14px;border:1px solid var(--border);
+                          border-radius:8px;background:var(--bg);color:var(--text-muted);
+                          font-size:0.9rem;">
+        </div>
+
+        <!-- Bio -->
+        <div class="mb-3">
+            <label class="text-muted-gm fw-semibold" style="font-size:0.82rem;display:block;margin-bottom:4px;">
+                BIO
+            </label>
+            <textarea name="bio" rows="4" maxlength="500"
+                      placeholder="Tell the world about yourself..."
+                      style="width:100%;padding:10px 14px;border:1px solid var(--border);
+                             border-radius:8px;background:var(--bg);color:var(--text);
+                             font-size:0.9rem;resize:none;outline:none;line-height:1.5;">{{ user.bio }}</textarea>
+        </div>
+
+        <!-- Private account toggle -->
+        <div class="mb-4 d-flex align-items-center justify-content-between py-2 px-3"
+             style="border:1px solid var(--border);border-radius:10px;">
+            <div>
+                <div class="fw-semibold" style="font-size:0.9rem;">Private Account</div>
+                <div class="text-muted-gm" style="font-size:0.78rem;">Only followers can see your posts</div>
+            </div>
+            <label class="d-flex align-items-center" style="cursor:pointer;">
+                <input type="checkbox" name="is_private" id="privateToggle"
+                       {{ 'checked' if user.is_private else '' }}
+                       style="width:20px;height:20px;cursor:pointer;">
+            </label>
+        </div>
+
+        <button type="submit" class="btn-grad w-100 justify-content-center" style="padding:11px;">
+            <i class="fas fa-check me-2"></i>Save Changes
+        </button>
+        <a href="{{ url_for('profile', username=user.username) }}"
+           class="btn-outline-gm d-block text-center mt-2" style="padding:10px;">Cancel</a>
+    </form>
+
+</div>
+</div>
+</div>
+
+{% block scripts %}
+<script>
+// Live avatar preview
+document.getElementById('picInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('avatarPreview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

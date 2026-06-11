@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}{{ user.username }} – GMinsta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-2">
+<div class="col-12 col-md-9 col-lg-8">
+
+    <!-- ── Profile Header ── -->
+    <div class="profile-header">
+        <!-- Avatar -->
+        <div class="flex-shrink-0">
+            {% if user.profile_pic == 'default.jpg' %}
+            <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=150&background=random&rounded=true"
+                 class="avatar-lg" alt="{{ user.username }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/avatars/' + user.profile_pic) }}"
+                 class="avatar-lg" alt="{{ user.username }}">
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="flex-grow-1">
+            <!-- Username + Action Buttons -->
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <h1 class="profile-username mb-0">{{ user.username }}</h1>
+
+                {% if current_user.id == user.id %}
+                    <a href="{{ url_for('edit_profile') }}" class="btn-outline-gm">Edit Profile</a>
+                {% else %}
+                    {% if not is_blocked %}
+                    <!-- Follow -->
+                    <form action="{{ url_for('follow', username=user.username) }}" method="POST" class="d-inline">
+                        <button type="submit" class="{{ 'btn-outline-gm' if current_user.is_following(user) else 'btn-grad' }}">
+                            {{ 'Following' if current_user.is_following(user) else 'Follow' }}
+                        </button>
+                    </form>
+                    <!-- Message -->
+                    <a href="{{ url_for('chat', username=user.username) }}" class="btn-outline-gm">
+                        <i class="far fa-paper-plane me-1"></i>Message
+                    </a>
+                    {% endif %}
+                    <!-- Block/Unblock -->
+                    <form action="{{ url_for('block_user', username=user.username) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn-danger-outline" style="font-size:0.82rem;padding:6px 12px;">
+                            {% if is_blocked %}<i class="fas fa-unlock me-1"></i>Unblock{% else %}<i class="fas fa-ban me-1"></i>{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+
+            <!-- Stats -->
+            <div class="profile-stats">
+                <div class="stat">
+                    <strong>{{ posts|length }}</strong>
+                    <span>posts</span>
+                </div>
+                <div class="stat">
+                    <strong>{{ user.followers_count() }}</strong>
+                    <span>followers</span>
+                </div>
+                <div class="stat">
+                    <strong>{{ user.following_count() }}</strong>
+                    <span>following</span>
+                </div>
+            </div>
+
+            <!-- Bio -->
+            {% if user.bio %}
+            <div class="profile-bio mt-2">{{ user.bio }}</div>
+            {% endif %}
+
+            {% if user.is_private and current_user.id != user.id and not current_user.is_following(user) %}
+            <p class="text-muted-gm mt-2" style="font-size:0.85rem;">
+                <i class="fas fa-lock me-1"></i>This account is private.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── Posts Grid ── -->
+    {% if is_blocked %}
+    <div class="empty-state">
+        <i class="fas fa-ban"></i>
+        <h4>User Blocked</h4>
+        <p>You've blocked this user. Their posts are hidden.</p>
+    </div>
+    {% elif posts|length == 0 %}
+    <div class="empty-state">
+        <i class="fas fa-camera"></i>
+        <h4>No Posts Yet</h4>
+        <p>When {{ user.username }} posts, you'll see it here.</p>
+    </div>
+    {% else %}
+    <div class="posts-grid">
+        {% for post in posts %}
+        <div class="grid-item" data-post-id="{{ post.id }}">
+            <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+                 alt="Post" loading="lazy">
+            <div class="grid-overlay">
+                <span><i class="fas fa-heart me-1"></i>{{ post.like_count() }}</span>
+                <span><i class="fas fa-comment me-1"></i>{{ post.comments|length }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Delete own post (if own profile) -->
+    {% if current_user.id == user.id %}
+    <!-- hidden delete forms – triggered from JS if needed -->
+    {% for post in posts %}
+    <form id="del-{{ post.id }}" action="{{ url_for('delete_post', post_id=post.id) }}"
+          method="POST" style="display:none;"></form>
+    {% endfor %}
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}
